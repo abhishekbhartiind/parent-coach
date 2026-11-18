@@ -20,7 +20,7 @@ pnpm test:e2e                # Playwright (starts the dev server)
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL`            | key required if provider=anthropic / `claude-sonnet-5-5` | Anthropic settings                                                                                          |
 | `OPENAI_API_KEY` / `OPENAI_MODEL`                  | **both required** if provider=openai (no default model)  | OpenAI settings: set the exact ChatGPT model id                                                             |
 | `GEMINI_API_KEY` / `GEMINI_MODEL`                  | **both required** if provider=gemini (no default model)  | Gemini settings. Thinking models spend output tokens on reasoning, so consider `LLM_MAX_OUTPUT_TOKENS=2000` |
-| `LLM_TIMEOUT_MS` / `LLM_MAX_OUTPUT_TOKENS`         | `20000` / `700`                                          | Latency and cost guard-rails (apply to either provider)                                                     |
+| `LLM_TIMEOUT_MS` / `LLM_MAX_OUTPUT_TOKENS`         | `20000` / `2000`                                         | Latency and cost guard-rails (apply to either provider)                                                     |
 | `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | `20` / `60000`                                           | Per-IP sliding window                                                                                       |
 | `LOG_LEVEL`                                        | `info`                                                   | `debug` \| `info` \| `warn` \| `error`                                                                      |
 

@@ -1,10 +1,14 @@
 /**
  * Anthropic adapter for `LlmClient`.
  *
- * Structured output is obtained by forcing a single tool call whose
+ * Structured output comes from a single tool call whose
  * `input_schema` is generated from the shared zod schema (no duplicated
  * JSON-schema to drift). SDK-level retries handle transient 429/5xx; this
  * layer only translates provider failures into domain errors.
+ *
+ * Sonnet 5.5 rejects forced `tool_choice` ("tool"/"any") with a 400, so we use
+ * "auto"; the system prompt requires the tool and a missing call is a
+ * `LlmResponseError`.
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { ConfigError, LlmResponseError, LlmUnavailableError } from "@/lib/errors";
@@ -41,12 +45,19 @@ export class AnthropicLlmClient implements LlmClient {
               input_schema: this.toolInputSchema,
             },
           ],
-          tool_choice: { type: "tool", name: COACH_TOOL_NAME },
+          tool_choice: { type: "auto" },
         },
         { signal },
       );
     } catch (error) {
       throw this.translateError(error);
+    }
+
+    // A cut-off reply leaves a partial tool input that fails validation; say why.
+    if (response.stop_reason === "max_tokens") {
+      throw new LlmResponseError("Reply truncated: raise LLM_MAX_OUTPUT_TOKENS", {
+        meta: { maxOutputTokens: this.maxOutputTokens, model: this.model },
+      });
     }
 
     const toolUse = response.content.find(

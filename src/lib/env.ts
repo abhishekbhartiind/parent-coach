@@ -12,19 +12,25 @@ import { ConfigError } from "@/lib/errors";
 export const LLM_PROVIDERS = ["anthropic", "openai", "gemini"] as const;
 export type LlmProvider = (typeof LLM_PROVIDERS)[number];
 
+/** Empty / whitespace `.env` values (`KEY=`) must not fail `.min(1)` for unused providers. */
+const optionalNonEmptyString = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const llmEnvSchema = z
   .object({
     LLM_PROVIDER: z.enum(LLM_PROVIDERS).default("anthropic"),
-    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    ANTHROPIC_API_KEY: optionalNonEmptyString,
     ANTHROPIC_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
-    OPENAI_API_KEY: z.string().min(1).optional(),
+    OPENAI_API_KEY: optionalNonEmptyString,
     // No default on purpose: OpenAI model names change often; you choose.
-    OPENAI_MODEL: z.string().min(1).optional(),
-    GEMINI_API_KEY: z.string().min(1).optional(),
+    OPENAI_MODEL: optionalNonEmptyString,
+    GEMINI_API_KEY: optionalNonEmptyString,
     // No default on purpose: Gemini model names change often; you choose.
-    GEMINI_MODEL: z.string().min(1).optional(),
+    GEMINI_MODEL: optionalNonEmptyString,
     LLM_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(20_000),
-    LLM_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(200).max(4_000).default(700),
+    LLM_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(200).max(4_000).default(2_000),
   })
   .superRefine((env, ctx) => {
     const need = (key: keyof typeof env) => {

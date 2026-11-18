@@ -59,23 +59,42 @@ describe("errors and env", () => {
 
   it("getLlmEnv names invalid variables but never their values", () => {
     try {
-      getLlmEnv({ ANTHROPIC_API_KEY: "", LLM_TIMEOUT_MS: "nope" } as unknown as NodeJS.ProcessEnv);
+      getLlmEnv({
+        ANTHROPIC_API_KEY: "sk-secret-hunter2",
+        LLM_TIMEOUT_MS: "nope",
+      } as unknown as NodeJS.ProcessEnv);
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(ConfigError);
-      expect((error as Error).message).toContain("ANTHROPIC_API_KEY");
+      expect((error as Error).message).toContain("LLM_TIMEOUT_MS");
       expect((error as Error).message).not.toContain("nope");
+      expect((error as Error).message).not.toContain("sk-secret-hunter2");
     }
   });
 
   it("requires the key and model for the selected provider only", () => {
     const run = (env: Record<string, string>) => () => getLlmEnv(env as unknown as NodeJS.ProcessEnv);
+    expect(run({ LLM_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "" })).toThrow(/ANTHROPIC_API_KEY/);
     expect(run({ LLM_PROVIDER: "openai", OPENAI_API_KEY: "k" })).toThrow(/OPENAI_MODEL/);
     expect(run({ LLM_PROVIDER: "openai", OPENAI_API_KEY: "k", OPENAI_MODEL: "m" })).not.toThrow();
     expect(run({ LLM_PROVIDER: "openai", OPENAI_MODEL: "m", ANTHROPIC_API_KEY: "k" })).toThrow(/OPENAI_API_KEY/);
     expect(run({ LLM_PROVIDER: "gemini", GEMINI_API_KEY: "k" })).toThrow(/GEMINI_MODEL/);
     expect(run({ LLM_PROVIDER: "gemini", GEMINI_API_KEY: "k", GEMINI_MODEL: "m" })).not.toThrow();
     expect(run({ LLM_PROVIDER: "claude" })).toThrow();
+  });
+
+  it("ignores empty unused provider keys from .env templates", () => {
+    const llm = getLlmEnv({
+      LLM_PROVIDER: "anthropic",
+      ANTHROPIC_API_KEY: "k",
+      OPENAI_API_KEY: "",
+      OPENAI_MODEL: "   ",
+      GEMINI_API_KEY: "",
+      GEMINI_MODEL: "",
+    } as unknown as NodeJS.ProcessEnv);
+    expect(llm.LLM_PROVIDER).toBe("anthropic");
+    expect(llm.OPENAI_API_KEY).toBeUndefined();
+    expect(llm.GEMINI_API_KEY).toBeUndefined();
   });
 
   it("applies defaults", () => {
