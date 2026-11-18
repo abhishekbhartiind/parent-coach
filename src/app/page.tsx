@@ -1,5 +1,5 @@
-import { ChatShell } from "@/features/coach/components/chat-shell";
+import { LandingPage } from "@/features/landing/landing-page";
 
 export default function HomePage() {
-  return <ChatShell />;
+  return <LandingPage />;
 }

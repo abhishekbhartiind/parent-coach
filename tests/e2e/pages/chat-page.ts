@@ -5,7 +5,7 @@ export class ChatPage {
   constructor(private readonly page: Page) {}
 
   async goto() {
-    await this.page.goto("/");
+    await this.page.goto("/chat");
   }
 
   composer() {

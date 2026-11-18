@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RotateCcw, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_COPY } from "../content/ui-copy";
@@ -10,7 +11,7 @@ interface AppHeaderProps {
 export function AppHeader({ canReset, onReset }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
-      <div className="flex min-w-0 items-center gap-3">
+      <Link href="/" className="flex min-w-0 items-center gap-3 rounded-xl" aria-label={`${APP_COPY.name} home`}>
         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
           <Sprout className="size-5" aria-hidden />
         </div>
@@ -23,7 +24,7 @@ export function AppHeader({ canReset, onReset }: AppHeaderProps) {
           </h1>
           <p className="truncate text-xs text-muted-foreground">{APP_COPY.tagline}</p>
         </div>
-      </div>
+      </Link>
       {canReset && (
         <Button variant="ghost" size="sm" onClick={onReset}>
           <RotateCcw aria-hidden />

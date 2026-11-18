@@ -9,7 +9,7 @@ A small Next.js app where a parent describes a concern in **English or Urdu** (s
 ```bash
 cp .env.example .env.local   # pick LLM_PROVIDER and set that provider's key
 pnpm install
-pnpm dev                     # http://localhost:3000
+pnpm dev                     # http://localhost:3000 (landing), /chat (coach)
 pnpm check                   # format, lint, typecheck, unit + integration
 pnpm test:e2e                # Playwright (starts the dev server)
 ```
@@ -32,7 +32,7 @@ Set `LLM_PROVIDER` (`anthropic`, `openai` or `gemini`) plus that provider's key 
 
 ```
 src/
-  app/                         Routing only: layout, page, api/coach/route.ts
+  app/                         Routing only: layout, page (landing), chat/page, api/coach/route.ts
   components/ui/               shadcn primitives (button, card, alert, badge, textarea)
   lib/                         Cross-cutting infra, no feature knowledge
     env.ts  errors.ts  logger.ts  rate-limit.ts  utils.ts  api/handler.ts
@@ -42,6 +42,7 @@ src/
     server/                    prompt, safety-screen, coach-service, container, llm/
     client/                    typed API client + useCoachChat hook
     components/                Presentational chat UI
+  features/landing/            Static landing page (server component)
 tests/
   unit/                        Vitest: domain, service, client, infra
   integration/                 Vitest: POST /api/coach with a fake LLM
