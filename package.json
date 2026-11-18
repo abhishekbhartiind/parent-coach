@@ -1,0 +1,78 @@
+{
+  "name": "parent-coach",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Abhishek Bharti",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishekbhartiind/parent-coach"
+  },
+  "bugs": {
+    "url": "https://github.com/abhishekbhartiind/parent-coach/issues"
+  },
+  "homepage": "https://github.com/abhishekbhartiind/parent-coach#readme",
+  "packageManager": "pnpm@12.21.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "dev": "pnpm exec next dev",
+    "build": "pnpm exec next build",
+    "start": "pnpm exec next start",
+    "lint": "pnpm exec eslint . --max-warnings 0",
+    "lint:fix": "pnpm exec eslint . --fix",
+    "format": "pnpm exec prettier --write .",
+    "format:check": "pnpm exec prettier --check .",
+    "typecheck": "pnpm exec tsc --noEmit",
+    "test": "pnpm run test:unit && pnpm run test:integration",
+    "test:unit": "pnpm exec vitest run --project unit",
+    "test:integration": "pnpm exec vitest run --project integration",
+    "test:e2e": "pnpm exec playwright test",
+    "test:watch": "pnpm exec vitest --project unit",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,tsx,mts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/noto-nastaliq-urdu": "^5.3.0",
+    "@google/genai": "^3.4.0",
+    "@radix-ui/react-slot": "^1.5.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.74.0",
+    "next": "16.4.6",
+    "openai": "^7.57.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.1",
+    "prettier": "^3.10.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  }
+}
