@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { LlmUnavailableError } from "@/lib/errors";
+import { LlmResponseError, LlmUnavailableError } from "@/lib/errors";
 import { createLogger } from "@/lib/logger";
 import type { ChatTurn, CoachReply } from "@/features/coach/domain/schemas";
 import { applySafetyFloor, buildFallbackReply, CoachService, trimHistory } from "@/features/coach/server/coach-service";
@@ -31,6 +31,18 @@ describe("CoachService.respond", () => {
       vi
         .fn()
         .mockResolvedValueOnce(ok({ nope: true }))
+        .mockResolvedValueOnce(ok(plan)),
+    );
+    const service = new CoachService(llm);
+    await expect(service.respond([user("bedtime is hard")], { log: silentLog })).resolves.toEqual(plan);
+    expect(llm.generateCoachReply).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries once when the model returns no usable tool call", async () => {
+    const llm = fakeLlm(
+      vi
+        .fn()
+        .mockRejectedValueOnce(new LlmResponseError("Model returned no tool_use block"))
         .mockResolvedValueOnce(ok(plan)),
     );
     const service = new CoachService(llm);

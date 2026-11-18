@@ -107,7 +107,7 @@
   }
 
   /* Urdu text: Nastaliq needs a dedicated face and taller line height. */
-  :lang(ur) {
+  :lang(ur):not(:lang(ur-Latn)) {
     font-family: var(--font-urdu);
     line-height: 2.15;
     letter-spacing: 0;

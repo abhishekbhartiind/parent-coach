@@ -97,7 +97,16 @@ export class CoachService {
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= MAX_SCHEMA_ATTEMPTS; attempt++) {
-      const result = await this.llm.generateCoachReply({ system, messages: history, signal });
+      let result;
+      try {
+        result = await this.llm.generateCoachReply({ system, messages: history, signal });
+      } catch (error) {
+        // A malformed reply (e.g. no tool call) is worth one more try; outages are not.
+        if (!(error instanceof LlmResponseError)) throw error;
+        lastError = error;
+        log.warn("coach.llm.bad_response", { attempt, reason: error.message });
+        continue;
+      }
       const parsed = coachReplySchema.safeParse(result.output);
 
       if (parsed.success) {

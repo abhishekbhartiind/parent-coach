@@ -2,6 +2,7 @@ import { CalendarClock, MessageCircleQuestionMark, ShieldCheck } from "lucide-re
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { SECTION_COPY } from "../content/ui-copy";
+import { containsUrduScript } from "../domain/language";
 import type { CoachReply, Language } from "../domain/schemas";
 import { CoachAvatar } from "./coach-avatar";
 import { EscalationAlert } from "./escalation-alert";
@@ -21,7 +22,10 @@ function SectionLabel({ language, children }: { language: Language; children: Re
 }
 
 export function CoachReplyCard({ reply }: { reply: CoachReply }) {
-  const { language, escalation } = reply;
+  const { escalation } = reply;
+  // Roman Urdu is Urdu in Latin script: render it LTR with Latin labels and font.
+  const isRomanUrdu = reply.language === "ur" && !containsUrduScript(reply.acknowledgement);
+  const language: Language = isRomanUrdu ? "en" : reply.language;
   const copy = SECTION_COPY[language];
   const isEscalation = escalation !== "none";
   const FollowUpIcon = reply.followUp.kind === "question" ? MessageCircleQuestionMark : CalendarClock;
@@ -30,9 +34,13 @@ export function CoachReplyCard({ reply }: { reply: CoachReply }) {
     <div className="flex gap-3">
       <CoachAvatar />
       <div className="min-w-0 flex-1 space-y-3">
-        {isEscalation && <EscalationAlert type={escalation} language={language} />}
+        {isEscalation && <EscalationAlert type={escalation} language={reply.language} />}
 
-        <Card dir={language === "ur" ? "rtl" : "ltr"} lang={language} className="gap-4 rounded-2xl rounded-tl-md py-4">
+        <Card
+          dir={language === "ur" ? "rtl" : "ltr"}
+          lang={isRomanUrdu ? "ur-Latn" : language}
+          className="gap-4 rounded-2xl rounded-tl-md py-4"
+        >
           <CardContent className="space-y-4">
             <p className="text-[15px] leading-relaxed text-pretty">{reply.acknowledgement}</p>
 

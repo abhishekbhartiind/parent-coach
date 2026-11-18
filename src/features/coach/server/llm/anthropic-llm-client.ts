@@ -17,11 +17,29 @@ import { buildCoachToolJsonSchema, COACH_TOOL_DESCRIPTION, COACH_TOOL_NAME } fro
 
 type ToolInputSchema = Anthropic.Messages.Tool["input_schema"];
 
+/**
+ * Strict tool use guarantees the tool input matches the schema (without it,
+ * Sonnet sometimes serialises the nested `followUp` object as a broken string).
+ * Strict mode rejects length keywords, so drop them here; Zod still enforces
+ * them when the service validates the reply.
+ */
+const STRICT_UNSUPPORTED_KEYS = new Set(["maxItems", "minItems", "maxLength", "minLength"]);
+
+export function toStrictToolSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(toStrictToolSchema);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !STRICT_UNSUPPORTED_KEYS.has(key))
+      .map(([key, child]) => [key, toStrictToolSchema(child)]),
+  );
+}
+
 export class AnthropicLlmClient implements LlmClient {
   private readonly client: Anthropic;
   private readonly model: string;
   private readonly maxOutputTokens: number;
-  private readonly toolInputSchema = buildCoachToolJsonSchema() as ToolInputSchema;
+  private readonly toolInputSchema = toStrictToolSchema(buildCoachToolJsonSchema()) as ToolInputSchema;
 
   constructor(settings: LlmClientSettings) {
     this.client = new Anthropic({ apiKey: settings.apiKey, timeout: settings.timeoutMs, maxRetries: 2 });
@@ -43,6 +61,7 @@ export class AnthropicLlmClient implements LlmClient {
               name: COACH_TOOL_NAME,
               description: COACH_TOOL_DESCRIPTION,
               input_schema: this.toolInputSchema,
+              strict: true,
             },
           ],
           tool_choice: { type: "auto" },
